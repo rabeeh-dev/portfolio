@@ -66,7 +66,7 @@ export function Contact({ settings }: ContactProps) {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} noValidate className="space-y-4">
                 <input
                   type="text"
                   placeholder="Your name"

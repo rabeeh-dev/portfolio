@@ -7,7 +7,9 @@
     "dev": "concurrently \"vite\" \"npm run server:dev\"",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "node --test tests/portfolio.test.mjs",
+    "test": "node --test tests/portfolio.test.mjs && node tests/dom.test.mjs",
+    "test:unit": "node --test tests/portfolio.test.mjs",
+    "test:dom": "node tests/dom.test.mjs",
     "server:dev": "cd server && npx tsx watch index.ts"
   },
   "dependencies": {
@@ -24,6 +26,7 @@
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.0",
     "postcss": "^8.4.49",
+    "puppeteer-core": "^25.16.0",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3",
     "vite": "^6.0.1"

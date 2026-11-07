@@ -21,10 +21,16 @@ This document details the test matrix, test cases, preconditions, execution step
 
 ## 2. Automated Test Execution
 
-Run the automated test suite directly in terminal:
+Run the automated test suite directly in your terminal:
 ```bash
+# Run all tests (Unit + DOM integration)
 npm test
-# or: node --test tests/portfolio.test.mjs
+
+# Run headless Chrome DOM tests only
+npm run test:dom
+
+# Run Unit and Contract tests only
+npm run test:unit
 ```
 
 ---
