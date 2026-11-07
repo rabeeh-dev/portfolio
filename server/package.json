@@ -1,0 +1,21 @@
+{
+  "name": "portfolio-server",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "@types/nodemailer": "^8.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/multer": "^1.4.12",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
