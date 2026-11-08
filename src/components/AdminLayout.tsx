@@ -55,12 +55,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
       <div className="max-w-content mx-auto px-3 py-6">
         {/* Header */}
         <div className="bg-card-light dark:bg-card-dark rounded-card px-6 py-4 mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-heading-light dark:text-heading-dark font-medium text-sm hover:opacity-70 transition-opacity">
-              ← Site
-            </Link>
-            <h1 className="text-heading-light dark:text-heading-dark font-medium">Admin</h1>
-          </div>
+          <h1 className="text-heading-light dark:text-heading-dark font-medium text-lg">Admin</h1>
           <button
             onClick={handleSignOut}
             className="px-4 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm text-body-light dark:text-body-dark hover:text-heading-light dark:hover:text-heading-dark transition-colors"

@@ -11,6 +11,7 @@ export function ProjectDetail() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    window.scrollTo(0, 0)
     if (slug) {
       getProjectBySlug(slug)
         .then(setProject)

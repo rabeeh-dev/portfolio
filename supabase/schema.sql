@@ -10,20 +10,20 @@ create extension if not exists "uuid-ossp";
 
 create table if not exists settings (
   id uuid primary key default uuid_generate_v4(),
-  name text not null default 'Alex Morgan',
-  role text not null default 'Digital Designer',
-  intro text not null default 'I craft thoughtful digital experiences that merge form and function. Currently available for freelance work.',
-  about text not null default 'I''m a digital designer and developer based in San Francisco with over 8 years of experience creating beautiful, functional digital products. I believe great design is invisible — it just works. My approach combines clean aesthetics with intuitive user experiences, always keeping the end user at the center of every decision.',
+  name text not null default '',
+  role text not null default '',
+  intro text not null default '',
+  about text not null default '',
   avatar_url text,
   hero_image_url text,
-  email text not null default 'hello@alexmorgan.design',
-  social_github text default 'https://github.com',
-  social_x text default 'https://x.com',
-  social_linkedin text default 'https://linkedin.com',
-  social_instagram text default 'https://instagram.com',
+  email text not null default '',
+  social_github text,
+  social_x text,
+  social_linkedin text,
+  social_instagram text,
   available boolean not null default true,
-  years_experience integer default 8,
-  projects_done integer default 50,
+  years_experience integer,
+  projects_done integer,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -103,75 +103,19 @@ create policy "Admin can delete services" on services
 
 
 -- ════════════════════════════════════════════════════════════
--- Seed Data
+-- Initial Setup (Blank slate - no dummy values)
 -- ════════════════════════════════════════════════════════════
 
--- Settings
-insert into settings (name, role, intro, about, email, available, years_experience, projects_done)
-values (
-  'Alex Morgan',
-  'Digital Designer',
-  'I craft thoughtful digital experiences that merge form and function. Currently available for freelance work.',
-  'I''m a digital designer and developer based in San Francisco with over 8 years of experience creating beautiful, functional digital products. I believe great design is invisible — it just works. My approach combines clean aesthetics with intuitive user experiences, always keeping the end user at the center of every decision.',
-  'hello@alexmorgan.design',
-  true,
-  8,
-  50
-);
-
--- Projects
-insert into projects (title, slug, short_description, long_description, tags, featured, display_order) values
-(
-  'Meridian App',
-  'meridian-app',
-  'A meditation and wellness app with a calming interface designed to reduce digital anxiety.',
-  'Meridian is a meditation and wellness application designed to help users find calm in their daily routines. The project involved creating a soothing visual language, intuitive navigation, and seamless audio integration. The interface was designed to feel peaceful from the first interaction, using soft gradients and minimal UI elements that fade away during meditation sessions.',
-  ARRAY['UI/UX', 'Mobile', 'Wellness'],
-  true,
-  1
-),
-(
-  'Folio Studio',
-  'folio-studio',
-  'Brand identity and website for a boutique architecture studio based in Portland.',
-  'Folio Studio is a boutique architecture firm that needed a digital presence matching their refined aesthetic. The project encompassed brand identity design, a responsive portfolio website, and a custom CMS for showcasing their architectural projects. The design emphasizes generous white space and large photography to let their work speak for itself.',
-  ARRAY['Branding', 'Web', 'Architecture'],
-  true,
-  2
-),
-(
-  'Kinetic Dashboard',
-  'kinetic-dashboard',
-  'An analytics dashboard with real-time data visualization for a SaaS platform.',
-  'Kinetic is a SaaS analytics platform that required a complete redesign of their dashboard experience. The goal was to transform complex data sets into clear, actionable visualizations. The design system includes over 40 chart components, dark and light themes, and responsive layouts that adapt from desktop monitors to tablets.',
-  ARRAY['Dashboard', 'SaaS', 'Data Viz'],
-  true,
-  3
-);
-
--- Services
-insert into services (title, description, display_order) values
-(
-  'UI/UX Design',
-  'Creating intuitive and beautiful user interfaces with a focus on user experience, accessibility, and modern design principles.',
-  1
-),
-(
-  'Web Development',
-  'Building fast, responsive websites and web applications using modern technologies like React, Next.js, and TypeScript.',
-  2
-),
-(
-  'Brand Identity',
-  'Crafting cohesive visual identities including logos, color systems, typography, and brand guidelines that tell your story.',
-  3
-);
+-- Ensure a blank settings row exists if the table is empty
+insert into settings (name, role, intro, about, email, available)
+select '', '', '', '', '', true
+where not exists (select 1 from settings);
 
 -- ════════════════════════════════════════════════════════════
 -- Migration for existing databases (safe to run anytime)
 -- ════════════════════════════════════════════════════════════
-alter table settings add column if not exists social_x text default 'https://x.com';
-alter table settings add column if not exists social_instagram text default 'https://instagram.com';
+alter table settings add column if not exists social_x text;
+alter table settings add column if not exists social_instagram text;
 
 do $$
 begin

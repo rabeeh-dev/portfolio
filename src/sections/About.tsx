@@ -7,6 +7,10 @@ interface AboutProps {
 }
 
 export function About({ settings }: AboutProps) {
+  if (!settings.about && !settings.years_experience && !settings.projects_done) {
+    return null
+  }
+
   return (
     <FadeIn>
       <Card id="about">
