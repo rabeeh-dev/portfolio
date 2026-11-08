@@ -129,25 +129,30 @@ end $$;
 
 -- ════════════════════════════════════════════════════════════
 -- Storage Bucket for Image Uploads
+-- Run this in your Supabase SQL Editor to enable image uploads
 -- ════════════════════════════════════════════════════════════
 insert into storage.buckets (id, name, public)
 values ('portfolio', 'portfolio', true)
 on conflict (id) do nothing;
 
+drop policy if exists "Public Access" on storage.objects;
 create policy "Public Access"
 on storage.objects for select
 using ( bucket_id = 'portfolio' );
 
+drop policy if exists "Authenticated users can upload" on storage.objects;
 create policy "Authenticated users can upload"
 on storage.objects for insert
 to authenticated
 with check ( bucket_id = 'portfolio' );
 
+drop policy if exists "Authenticated users can update" on storage.objects;
 create policy "Authenticated users can update"
 on storage.objects for update
 to authenticated
 using ( bucket_id = 'portfolio' );
 
+drop policy if exists "Authenticated users can delete" on storage.objects;
 create policy "Authenticated users can delete"
 on storage.objects for delete
 to authenticated

@@ -279,8 +279,23 @@ export async function uploadImage(file: File): Promise<string> {
         return urlData.publicUrl
       }
     }
-  } catch {
-    // Fall back to local/server endpoint if Supabase storage is not yet initialized
+
+    if (uploadError) {
+      console.warn('[Upload] Supabase Storage upload skipped/failed:', uploadError.message)
+      const isMissingBucket =
+        uploadError.message?.toLowerCase().includes('bucket not found') ||
+        (uploadError as any).code === 'NoSuchBucket' ||
+        (uploadError as any).status === 400 ||
+        (uploadError as any).statusCode === '404'
+      if (isMissingBucket && typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+        throw new Error("Supabase Storage bucket 'portfolio' not found. Please create a public bucket named 'portfolio' in your Supabase Dashboard (Storage > New bucket), or run the storage SQL in supabase/schema.sql.")
+      }
+    }
+  } catch (err: any) {
+    if (err?.message?.includes('Supabase Storage bucket')) {
+      throw err
+    }
+    // Fall back to local Express dev server if running locally
   }
 
   // 2. Fallback to /api/upload (for local Express dev server)
