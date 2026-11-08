@@ -37,11 +37,11 @@ export function Navbar({ settings, themeHook }: NavbarProps) {
             <Link to="/" className="flex items-center gap-2.5 hover:opacity-80 transition-opacity shrink-0">
               <div className="w-8 h-8 bg-heading-light dark:bg-heading-dark rounded-full flex items-center justify-center shrink-0">
                 <span className="text-white dark:text-page-dark text-sm font-semibold">
-                  {settings?.name?.charAt(0) || 'P'}
+                  {settings?.name?.charAt(0) || 'R'}
                 </span>
               </div>
               <span className="font-medium text-heading-light dark:text-heading-dark text-sm hidden sm:block truncate max-w-[140px] md:max-w-[200px]">
-                {settings?.name || 'Portfolio'}
+                {settings?.name || 'Rabeeh'}
               </span>
             </Link>
 

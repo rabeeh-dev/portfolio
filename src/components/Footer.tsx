@@ -7,7 +7,7 @@ interface FooterProps {
 export function Footer({ settings }: FooterProps) {
   return (
     <footer className="text-center py-8 text-sm text-body-light dark:text-body-dark">
-      © {new Date().getFullYear()} {settings?.name || 'Portfolio'}. All rights reserved.
+      © {new Date().getFullYear()} {settings?.name || 'Rabeeh'}. All rights reserved.
     </footer>
   )
 }
