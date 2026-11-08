@@ -41,6 +41,8 @@ export function Projects() {
                     <img
                       src={project.cover_image_url}
                       alt={project.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-48 md:h-56 object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (

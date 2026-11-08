@@ -20,6 +20,8 @@ export function Hero({ settings }: HeroProps) {
                 <img
                   src={settings.avatar_url}
                   alt={settings.name || 'Avatar'}
+                  loading="eager"
+                  decoding="async"
                   className="w-12 h-12 rounded-full object-cover"
                 />
               ) : settings.name ? (
@@ -66,10 +68,13 @@ export function Hero({ settings }: HeroProps) {
 
       {settings.hero_image_url && (
         <FadeIn>
-          <div className="relative rounded-card overflow-hidden">
+          <div className="relative rounded-card overflow-hidden bg-card-light dark:bg-card-dark">
             <img
               src={settings.hero_image_url}
               alt={settings.name || 'Hero'}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-[380px] sm:h-[480px] md:h-[600px] lg:h-[660px] object-cover"
             />
             {settings.name && <div className="notch-tag">{settings.name}</div>}

@@ -69,10 +69,13 @@ export function ProjectDetail() {
       </Card>
 
       {project.cover_image_url && (
-        <div className="rounded-card overflow-hidden">
+        <div className="rounded-card overflow-hidden bg-card-light dark:bg-card-dark">
           <img
             src={project.cover_image_url}
             alt={project.title}
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-[300px] md:h-[500px] object-cover"
           />
         </div>
@@ -87,8 +90,14 @@ export function ProjectDetail() {
       {project.gallery_images.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {project.gallery_images.map((img, i) => (
-            <div key={i} className="rounded-card overflow-hidden">
-              <img src={img} alt={`${project.title} gallery ${i + 1}`} className="w-full h-64 object-cover" />
+            <div key={i} className="rounded-card overflow-hidden bg-card-light dark:bg-card-dark">
+              <img
+                src={img}
+                alt={`${project.title} gallery ${i + 1}`}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-64 object-cover"
+              />
             </div>
           ))}
         </div>

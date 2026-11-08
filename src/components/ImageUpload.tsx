@@ -27,7 +27,7 @@ function createImage(url: string): Promise<HTMLImageElement> {
 async function getCroppedBlob(
   imageSrc: string,
   pixelCrop: Area,
-  mimeType: string = 'image/jpeg'
+  maxDimension: number = 1920
 ): Promise<Blob> {
   const image = await createImage(imageSrc)
   const canvas = document.createElement('canvas')
@@ -37,17 +37,21 @@ async function getCroppedBlob(
     throw new Error('Canvas context not available')
   }
 
-  const targetWidth = Math.max(1, Math.round(pixelCrop.width))
-  const targetHeight = Math.max(1, Math.round(pixelCrop.height))
+  // Calculate target dimensions, scaling down if exceeds maxDimension
+  let targetWidth = Math.max(1, Math.round(pixelCrop.width))
+  let targetHeight = Math.max(1, Math.round(pixelCrop.height))
+
+  if (targetWidth > maxDimension || targetHeight > maxDimension) {
+    const scale = Math.min(maxDimension / targetWidth, maxDimension / targetHeight)
+    targetWidth = Math.max(1, Math.round(targetWidth * scale))
+    targetHeight = Math.max(1, Math.round(targetHeight * scale))
+  }
 
   canvas.width = targetWidth
   canvas.height = targetHeight
 
-  // If exporting as JPEG, fill white background for transparent images
-  if (mimeType === 'image/jpeg') {
-    ctx.fillStyle = '#FFFFFF'
-    ctx.fillRect(0, 0, targetWidth, targetHeight)
-  }
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
 
   ctx.drawImage(
     image,
@@ -61,19 +65,76 @@ async function getCroppedBlob(
     targetHeight
   )
 
+  // Export to modern WebP (85% quality: visually lossless, 80-90% smaller file size)
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
-        if (!blob) {
-          reject(new Error('Failed to create cropped image blob'))
-          return
+        if (blob) {
+          resolve(blob)
+        } else {
+          // Fallback to JPEG if WebP is unsupported by browser
+          canvas.toBlob(
+            (fallbackBlob) => {
+              if (!fallbackBlob) {
+                reject(new Error('Failed to create cropped image blob'))
+                return
+              }
+              resolve(fallbackBlob)
+            },
+            'image/jpeg',
+            0.85
+          )
         }
-        resolve(blob)
       },
-      mimeType,
-      0.92
+      'image/webp',
+      0.85
     )
   })
+}
+
+// Automatically compresses and downscales uncropped images (e.g. on Skip Crop)
+async function optimizeImageFile(file: File, maxDimension: number = 1920): Promise<File> {
+  // If already a tiny WebP/JPEG under 200KB, return as-is
+  if (file.size < 200 * 1024 && (file.type === 'image/webp' || file.type === 'image/jpeg')) {
+    return file
+  }
+
+  const objectUrl = URL.createObjectURL(file)
+  try {
+    const image = await createImage(objectUrl)
+    let width = image.naturalWidth || image.width
+    let height = image.naturalHeight || image.height
+
+    if (width > maxDimension || height > maxDimension) {
+      const scale = Math.min(maxDimension / width, maxDimension / height)
+      width = Math.max(1, Math.round(width * scale))
+      height = Math.max(1, Math.round(height * scale))
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return file
+
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(image, 0, 0, width, height)
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), 'image/webp', 0.85)
+    })
+
+    if (!blob) return file
+
+    const baseName = file.name.replace(/\.[^/.]+$/, '')
+    return new File([blob], `${baseName}.webp`, { type: 'image/webp' })
+  } catch (err) {
+    console.warn('[Image Optimize] Fallback to original file:', err)
+    return file
+  } finally {
+    URL.revokeObjectURL(objectUrl)
+  }
 }
 
 export function ImageUpload({
@@ -158,17 +219,20 @@ export function ImageUpload({
     setUploading(true)
 
     try {
-      let fileToUpload = selectedFile
+      let fileToUpload: File
+      const maxDim = cropShape === 'round' ? 512 : 1920
 
       // If croppedAreaPixels is defined and user hasn't chosen unconstrained without cropping
       if (croppedAreaPixels && croppedAreaPixels.width > 0 && croppedAreaPixels.height > 0) {
-        const mimeType = selectedFile.type === 'image/png' ? 'image/png' : 'image/jpeg'
-        const croppedBlob = await getCroppedBlob(imageSrc, croppedAreaPixels, mimeType)
-        const fileExt = mimeType === 'image/png' ? '.png' : '.jpg'
+        const croppedBlob = await getCroppedBlob(imageSrc, croppedAreaPixels, maxDim)
+        const isWebP = croppedBlob.type === 'image/webp'
+        const fileExt = isWebP ? '.webp' : '.jpg'
         const baseName = selectedFile.name.replace(/\.[^/.]+$/, '')
         fileToUpload = new File([croppedBlob], `${baseName}-cropped${fileExt}`, {
-          type: mimeType,
+          type: croppedBlob.type,
         })
+      } else {
+        fileToUpload = await optimizeImageFile(selectedFile, maxDim)
       }
 
       const url = await uploadImage(fileToUpload)
@@ -187,7 +251,9 @@ export function ImageUpload({
     setUploading(true)
 
     try {
-      const url = await uploadImage(selectedFile)
+      const maxDim = cropShape === 'round' ? 512 : 1920
+      const optimizedFile = await optimizeImageFile(selectedFile, maxDim)
+      const url = await uploadImage(optimizedFile)
       onChange(url)
       cleanupModal()
     } catch (err: any) {

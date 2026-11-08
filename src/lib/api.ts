@@ -267,7 +267,7 @@ export async function uploadImage(file: File): Promise<string> {
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('portfolio')
       .upload(filePath, file, {
-        cacheControl: '3600',
+        cacheControl: '31536000, immutable',
         upsert: false,
       })
 
