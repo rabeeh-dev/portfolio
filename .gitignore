@@ -1,6 +1,8 @@
 node_modules
 dist
 .env
+.vercel
 public/uploads/*
 !public/uploads/.gitkeep
 server/node_modules
+.env*

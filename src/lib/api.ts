@@ -260,6 +260,30 @@ export async function uploadImage(file: File): Promise<string> {
   const session = await getSession()
   if (!session) throw new Error('Not authenticated')
 
+  // 1. Try Supabase Storage first (direct CDN upload - works serverless in production)
+  try {
+    const ext = file.name.split('.').pop() || 'jpg'
+    const filePath = `uploads/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('portfolio')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
+
+    if (!uploadError && uploadData) {
+      const { data: urlData } = supabase.storage
+        .from('portfolio')
+        .getPublicUrl(filePath)
+      if (urlData?.publicUrl) {
+        return urlData.publicUrl
+      }
+    }
+  } catch {
+    // Fall back to local/server endpoint if Supabase storage is not yet initialized
+  }
+
+  // 2. Fallback to /api/upload (for local Express dev server)
   const formData = new FormData()
   formData.append('image', file)
 
